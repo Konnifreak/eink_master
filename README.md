@@ -1,7 +1,7 @@
 # eink-master
 
-Capture a web page at `1200 x 1600` pixels and display it on an Inky Impression
-13.3-inch e-ink display.
+Capture a web page at `1200 x 1600` pixels, rotate it, and display the resulting
+`1600 x 1200` landscape image on an Inky Impression 13.3-inch e-ink display.
 
 ## Raspberry Pi setup
 
@@ -10,7 +10,7 @@ Capture a web page at `1200 x 1600` pixels and display it on an Inky Impression
 
 	```bash
 	sudo apt update
-	sudo apt install -y chromium python3-dev python3-pip libopenjp2-7
+	sudo apt install -y chromium  libopenjp2-7 python3-dev python3-pip
 	```
 
 3. Install this package on the Pi:
