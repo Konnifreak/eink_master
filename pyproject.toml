@@ -1,0 +1,21 @@
+[project]
+name = "eink-master"
+version = "0.1.0"
+description = "Capture a web page and display it on an Inky Impression e-ink display"
+readme = "README.md"
+authors = [
+    { name = "konnifreak", email = "konnifreak@email.com" }
+]
+requires-python = ">=3.9"
+dependencies = [
+    "inky>=2.2.1",
+    "pillow>=10.0",
+    "playwright>=1.45",
+]
+
+[project.scripts]
+eink-master = "eink_master:main"
+
+[build-system]
+requires = ["uv_build>=0.12.6,<0.13.0"]
+build-backend = "uv_build"
