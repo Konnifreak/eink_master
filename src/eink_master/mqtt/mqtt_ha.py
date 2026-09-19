@@ -1,26 +1,41 @@
 import json
+from collections.abc import Callable
+
 import paho.mqtt.client as mqtt
 
 class MQTTHandler:
-    def __init__(self, broker, port=1883, client_id=None, username=None, password=None):
-        self.client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2,client_id)
+    def __init__(
+        self,
+        broker,
+        port=1883,
+        client_id=None,
+        username=None,
+        password=None,
+        on_disconnect_callback: Callable[[], None] | None = None,
+    ):
+        self.client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2, client_id)
         if username and password:
             self.client.username_pw_set(username, password)
         self.client.on_connect = self.on_connect
         self.client.on_message = self.on_message
         self.client.on_disconnect = self.on_disconnect
         self.message_callbacks = {}
+        self.topics = []
+        self.on_disconnect_callback = on_disconnect_callback
         self.client.connect(broker, port)
         self.is_it_connected = False
 
     def on_connect(self, client, userdata, flags, reason_code, properties):
-        if reason_code == "Success":
+        if str(reason_code) == "Success":
             self.is_it_connected = True
 
 
-    def on_disconnect(self, client, userdata, rc):
+    def on_disconnect(self, client, userdata, disconnect_flags, reason_code, properties):
         self.is_it_connected = False
-        if rc != 0:
+        if self.on_disconnect_callback is not None:
+            self.on_disconnect_callback()
+
+        if str(reason_code) != "Success":
             self.client.reconnect()
 
     #def is_connected(self):
@@ -81,6 +96,8 @@ class MQTTHandler:
                 "model": "eInky Frame",
                 "sw_version": "1.0.0"
             },
+            "max": 255,
+            "platform": "text",
             "qos": qos,
             "retain": retain
         }
