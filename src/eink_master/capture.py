@@ -9,8 +9,8 @@ from PIL import Image
 
 DISPLAY_WIDTH = 1200
 DISPLAY_HEIGHT = 1600
-OUTPUT_WIDTH = DISPLAY_HEIGHT
-OUTPUT_HEIGHT = DISPLAY_WIDTH
+OUTPUT_WIDTH = DISPLAY_WIDTH
+OUTPUT_HEIGHT = DISPLAY_HEIGHT
 
 
 class PageCapturer(Protocol):
@@ -50,7 +50,7 @@ class PlaywrightPageCapturer:
                 browser.close()
 
         with Image.open(BytesIO(screenshot)) as image:
-            return image.convert("RGB").transpose(Image.Transpose.ROTATE_90)
+            return image.convert("RGB")
 
     @staticmethod
     def _validate_url(url: str) -> None:

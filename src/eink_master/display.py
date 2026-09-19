@@ -5,10 +5,10 @@ from typing import Any
 
 from PIL import Image, ImageDraw, ImageFont
 
-from .capture import OUTPUT_HEIGHT, OUTPUT_WIDTH
+from .capture import DISPLAY_HEIGHT, DISPLAY_WIDTH
 
 
-_BANNER_FONT_SIZE = 54
+_BANNER_FONT_SIZE = 28
 _BODY_FONT_SIZE = 30
 _FOOTER_FONT_SIZE = 22
 _MARGIN_X = 64
@@ -85,7 +85,7 @@ class InkyDisplay(EInkDisplay):
         self.show(self._render_connection_status("MQTT DISCONNECTED", ["MQTT client disconnected"]))
 
     def _render_connection_status(self, title: str, lines: list[str]) -> Image.Image:
-        image = Image.new("RGB", (OUTPUT_WIDTH, OUTPUT_HEIGHT), "white")
+        image = Image.new("RGB", (DISPLAY_WIDTH, DISPLAY_HEIGHT), "white")
         draw = ImageDraw.Draw(image)
 
         title_font = self._load_monospace_font(56)
@@ -94,21 +94,21 @@ class InkyDisplay(EInkDisplay):
         title_height = self._line_height(title_font)
         body_height = self._line_height(body_font)
         total_height = title_height + 24 + (len(lines) * body_height) + max(0, (len(lines) - 1) * 14)
-        y = max(_MARGIN_Y, (OUTPUT_HEIGHT - total_height) // 2)
+        y = max(_MARGIN_Y, (DISPLAY_HEIGHT - total_height) // 2)
 
-        title_x = (OUTPUT_WIDTH - self._text_width(title, title_font)) // 2
+        title_x = (DISPLAY_WIDTH - self._text_width(title, title_font)) // 2
         draw.text((title_x, y), title, fill="black", font=title_font)
         y += title_height + 24
 
         for line in lines:
-            line_x = (OUTPUT_WIDTH - self._text_width(line, body_font)) // 2
+            line_x = (DISPLAY_WIDTH - self._text_width(line, body_font)) // 2
             draw.text((line_x, y), line, fill="black", font=body_font)
             y += body_height + 14
 
         return image
 
     def _render_startup_overview(self, text: list[str]) -> Image.Image:
-        image = Image.new("RGB", (OUTPUT_WIDTH, OUTPUT_HEIGHT), "white")
+        image = Image.new("RGB", (DISPLAY_WIDTH, DISPLAY_HEIGHT), "white")
         draw = ImageDraw.Draw(image)
 
         banner_font = self._load_monospace_font(_BANNER_FONT_SIZE)
@@ -118,7 +118,7 @@ class InkyDisplay(EInkDisplay):
         y = _MARGIN_Y
         y = self._draw_ascii_banner(draw, banner_font, y)
         y += 18
-        draw.line((_MARGIN_X, y, OUTPUT_WIDTH - _MARGIN_X, y), fill="black", width=3)
+        draw.line((_MARGIN_X, y, DISPLAY_WIDTH - _MARGIN_X, y), fill="black", width=3)
         y += 28
 
         for index, line in enumerate(text):
@@ -127,7 +127,7 @@ class InkyDisplay(EInkDisplay):
             wrapped_lines = self._wrap_text(
                 line,
                 body_font,
-                OUTPUT_WIDTH - (_MARGIN_X * 2) - prefix_width,
+                DISPLAY_WIDTH - (_MARGIN_X * 2) - prefix_width,
             )
 
             for wrapped_index, wrapped_line in enumerate(wrapped_lines):
@@ -138,7 +138,7 @@ class InkyDisplay(EInkDisplay):
             y += 6
 
         footer = "systemd: startup overview complete"
-        footer_y = OUTPUT_HEIGHT - _MARGIN_Y - self._line_height(footer_font)
+        footer_y = DISPLAY_HEIGHT - _MARGIN_Y - self._line_height(footer_font)
         draw.text((_MARGIN_X, footer_y), footer, fill="black", font=footer_font)
         return image
 

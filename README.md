@@ -1,7 +1,7 @@
 # eink-master
 
-Capture a web page at `1200 x 1600` pixels, rotate it, and display the resulting
-`1600 x 1200` landscape image on an Inky Impression 13.3-inch e-ink display.
+Capture and display web pages at the panel's native `1200 x 1600` portrait
+resolution on an Inky Impression 13.3-inch e-ink display.
 
 ## Raspberry Pi setup
 
