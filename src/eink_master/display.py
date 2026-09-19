@@ -75,7 +75,7 @@ class InkyDisplay(EInkDisplay):
         self._display = display
 
     def show(self, image: Image.Image) -> None:
-        self._display.set_image(image)
+        self._display.set_image(image.transpose(Image.Transpose.ROTATE_90))
         self._display.show()
 
     def render_startup_text(self, text: list[str]) -> None:
