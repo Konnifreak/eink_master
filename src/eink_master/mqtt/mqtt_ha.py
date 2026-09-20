@@ -104,6 +104,7 @@ class MQTTHandler:
         }
         # publish configuration topic
         check_config = self.client.publish(config_topic, json.dumps(config_payload), qos=qos, retain=retain)
+        check_command = self.client.publish(command_topic, json.dumps(payload), qos=qos, retain=retain)
         check_publish = self.client.publish(state_topic, json.dumps(payload), qos=qos, retain=retain)
         return check_publish[0]
 
