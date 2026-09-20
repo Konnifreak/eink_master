@@ -50,6 +50,15 @@ def main() -> None:
     mqtt_client.publish_homeassistant_text_data("render_url", "eInky Frame", "eink_frame_001", "", qos=0, retain=True)
     mqtt_client.publish_homeassistant_sensor_data("status", "eInky Frame", "eink_frame_001", "Connected", qos=0, retain=True)
 
-    mqtt_client.subscribe("homeassistant/sensor/render_url/state", lambda topic, payload: render_to_display(payload, browser_executable=Path(envs.get("browser_executable")), timeout_seconds=int(envs.get("timeout_seconds", 30))))
+    def handle_render_url(topic: str, payload: str) -> None:
+        mqtt_client.publish("homeassistant/text/render_url/state", payload, qos=0, retain=True)
+        render_to_display(
+            payload,
+            browser_executable=Path(envs.get("browser_executable")),
+            timeout_seconds=int(envs.get("timeout_seconds", 30)),
+        )
+
+    mqtt_client.subscribe("homeassistant/text/render_url/command", handle_render_url)
+
 
     mqtt_client.loop_forever()

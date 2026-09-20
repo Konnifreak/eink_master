@@ -81,6 +81,7 @@ class MQTTHandler:
 
     def publish_homeassistant_text_data(self, sensor_name, device_name, identifier, value, qos=2, retain=True):
         state_topic = f"homeassistant/text/{sensor_name}/state"
+        command_topic = f"homeassistant/text/{sensor_name}/command"
         payload = value
 
         # add configuration topic for Home Assistant discovery
@@ -88,6 +89,7 @@ class MQTTHandler:
         config_payload = {
             "name": sensor_name,
             "state_topic": state_topic,
+            "command_topic": command_topic,
             "unique_id": f"{device_name}_{sensor_name}",
             "device": {
                 "name": device_name,
