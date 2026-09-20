@@ -52,12 +52,14 @@ def main() -> None:
 
     def handle_render_url(topic: str, payload: str) -> None:
         mqtt_client.publish("homeassistant/text/render_url/state", payload, qos=0, retain=True)
-        render_to_display(
-            in_display=display,
-            url=payload,
-            browser_executable=Path(envs.get("browser_executable")),
-            timeout_seconds=int(envs.get("timeout_seconds", 30)),
-        )
+        #check if payload is a valid URL
+        if payload.startswith("http://") or payload.startswith("https://"):
+            render_to_display(
+                in_display=display,
+                url=payload,
+                browser_executable=Path(envs.get("browser_executable")),
+                timeout_seconds=int(envs.get("timeout_seconds", 30)),
+            )
 
     mqtt_client.subscribe("homeassistant/text/render_url/command", handle_render_url)
 
