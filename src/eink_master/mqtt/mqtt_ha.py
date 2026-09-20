@@ -97,7 +97,6 @@ class MQTTHandler:
                 "sw_version": "1.0.0"
             },
             "max": 255,
-            "platform": "text",
             "qos": qos,
             "retain": retain
         }

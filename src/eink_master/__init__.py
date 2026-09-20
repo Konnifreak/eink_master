@@ -48,6 +48,7 @@ def startup() -> tuple[dict[str, str | None], MQTTHandler]:
 def main() -> None:
     envs, mqtt_client = startup()
     mqtt_client.publish_homeassistant_text_data("render_url", "eInky Frame", "eink_frame_001", "", qos=0, retain=True)
+    mqtt_client.publish_homeassistant_sensor_data("status", "eInky Frame", "eink_frame_001", "Connected", qos=0, retain=True)
 
     mqtt_client.subscribe("homeassistant/sensor/render_url/state", lambda topic, payload: render_to_display(payload, browser_executable=Path(envs.get("browser_executable")), timeout_seconds=int(envs.get("timeout_seconds", 30))))
 
