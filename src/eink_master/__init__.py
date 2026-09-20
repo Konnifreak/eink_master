@@ -19,7 +19,7 @@ def render_to_display(url: str, browser_executable: Path | None = None, timeout_
     image = capturer.capture(url)
     InkyDisplay().show(image)
 
-def startup() -> tuple[dict[str, str | None], MQTTHandler]:
+def startup() -> tuple[dict[str, str | None], MQTTHandler, InkyDisplay]:
     env_vars = get_env_variable()
     if env_vars is None:
         raise ValueError("Could not load environment configuration")
@@ -42,16 +42,17 @@ def startup() -> tuple[dict[str, str | None], MQTTHandler]:
     first_startup_dict.append("IP Address: " + get_ip_address())
     display.render_startup_text(first_startup_dict)
 
-    return env_vars, mqtt_client
+    return env_vars, mqtt_client, display
 
 
 def main() -> None:
-    envs, mqtt_client = startup()
+    envs, mqtt_client, display = startup()
     mqtt_client.publish_homeassistant_text_data("render_url", "eInky Frame", "eink_frame_001", "", qos=0, retain=True)
     mqtt_client.publish_homeassistant_sensor_data("status", "eInky Frame", "eink_frame_001", "Connected", qos=0, retain=True)
 
     def handle_render_url(topic: str, payload: str) -> None:
         mqtt_client.publish("homeassistant/text/render_url/state", payload, qos=0, retain=True)
+        display.render_disconnected_text()
         render_to_display(
             payload,
             browser_executable=Path(envs.get("browser_executable")),
