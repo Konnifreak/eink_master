@@ -11,7 +11,7 @@ from .setup.env_setup import get_env_variable
 from .setup.get_ip import get_ip_address
 
 
-def render_to_display(url: str, browser_executable: Path | None = None, timeout_seconds: int = 30, in_display: InkyDisplay) -> None:
+def render_to_display(in_display: InkyDisplay, url: str, browser_executable: Path | None = None, timeout_seconds: int = 30) -> None:
     capturer = PlaywrightPageCapturer(
         browser_executable=browser_executable,
         timeout_seconds=timeout_seconds,
@@ -50,16 +50,16 @@ def main() -> None:
     mqtt_client.publish_homeassistant_text_data("render_url", "eInky Frame", "eink_frame_001", "", qos=0, retain=True)
     mqtt_client.publish_homeassistant_sensor_data("status", "eInky Frame", "eink_frame_001", "Connected", qos=0, retain=True)
 
-    def handle_render_url(topic: str, payload: str,display: InkyDisplay) -> None:
+    def handle_render_url(topic: str, payload: str) -> None:
         mqtt_client.publish("homeassistant/text/render_url/state", payload, qos=0, retain=True)
         render_to_display(
-            payload,
+            in_display=display,
+            url=payload,
             browser_executable=Path(envs.get("browser_executable")),
             timeout_seconds=int(envs.get("timeout_seconds", 30)),
-            in_display=display,
         )
 
-    mqtt_client.subscribe("homeassistant/text/render_url/command", handle_render_url(display=display))
+    mqtt_client.subscribe("homeassistant/text/render_url/command", handle_render_url)
 
 
     mqtt_client.loop_forever()
