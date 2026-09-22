@@ -18,8 +18,10 @@ def render_to_display(in_display: InkyDisplay, url: str, browser_executable: Pat
     )
     image = capturer.capture(url)
     in_display.show(image)
+    print("Rendering page to display...")
 
 def startup() -> tuple[dict[str, str | None], MQTTHandler, InkyDisplay]:
+    print("Starting up eInky Frame...")
     env_vars = get_env_variable()
     if env_vars is None:
         raise ValueError("Could not load environment configuration")
@@ -35,12 +37,15 @@ def startup() -> tuple[dict[str, str | None], MQTTHandler, InkyDisplay]:
         password=env_vars.get("mqtt_password") if env_vars.get("mqtt_username") and env_vars.get("mqtt_password") else None,
         on_disconnect_callback=display.render_disconnected_text,
     )
+    print("Connecting to MQTT broker...")
 
     first_startup_dict.append("MQTT Server: " + env_vars.get("mqtt_server", ""))
-    first_startup_dict.append("MQTT Status: " + ("Connected" if mqtt_client.is_it_connected else "Disconnected"))
+    first_startup_dict.append("MQTT Status: " + mqtt_client.is_it_connected )
 
     first_startup_dict.append("IP Address: " + get_ip_address())
     display.render_startup_text(first_startup_dict)
+
+    print("Startup complete. Waiting for MQTT messages...")
 
     return env_vars, mqtt_client, display
 

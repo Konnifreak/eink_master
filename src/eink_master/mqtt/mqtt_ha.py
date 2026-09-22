@@ -32,11 +32,13 @@ class MQTTHandler:
 
     def on_disconnect(self, client, userdata, disconnect_flags, reason_code, properties):
         self.is_it_connected = False
+        print("Disconnected from MQTT broker. Reason code: " + str(reason_code))
         if self.on_disconnect_callback is not None:
             self.on_disconnect_callback()
 
         if str(reason_code) != "Success":
             self.client.reconnect()
+            print("Reconnecting to MQTT broker...")
 
     #def is_connected(self):
         #return self.client.is_connected()
