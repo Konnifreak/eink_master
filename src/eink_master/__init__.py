@@ -40,7 +40,7 @@ def startup() -> tuple[dict[str, str | None], MQTTHandler, InkyDisplay]:
     print("Connecting to MQTT broker...")
 
     first_startup_dict.append("MQTT Server: " + env_vars.get("mqtt_server", ""))
-    first_startup_dict.append("MQTT Status: " + mqtt_client.is_it_connected )
+    first_startup_dict.append("MQTT Status: " + str(mqtt_client.is_it_connected))
 
     first_startup_dict.append("IP Address: " + get_ip_address())
     display.render_startup_text(first_startup_dict)
