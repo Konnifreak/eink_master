@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import datetime
+import logging
 
 from pathlib import Path
 
@@ -9,6 +10,12 @@ from .display import InkyDisplay
 from .mqtt.mqtt_ha import MQTTHandler
 from .setup.env_setup import get_env_variable
 from .setup.get_ip import get_ip_address
+
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s %(levelname)s %(name)s: %(message)s",
+)
 
 
 def render_to_display(in_display: InkyDisplay, url: str, browser_executable: Path | None = None, timeout_seconds: int = 30) -> None:

@@ -1,7 +1,12 @@
 import json
+import logging
 from collections.abc import Callable
 
 import paho.mqtt.client as mqtt
+
+
+logger = logging.getLogger(__name__)
+
 
 class MQTTHandler:
     def __init__(
@@ -22,23 +27,30 @@ class MQTTHandler:
         self.message_callbacks = {}
         self.topics = []
         self.on_disconnect_callback = on_disconnect_callback
+        logger.info("Connecting to MQTT broker %s:%s", broker, port)
         self.client.connect(broker, port)
         self.is_it_connected = False
 
     def on_connect(self, client, userdata, flags, reason_code, properties):
         if str(reason_code) == "Success":
             self.is_it_connected = True
+            logger.info("Connected to MQTT broker")
+        else:
+            logger.error("MQTT connection failed: %s", reason_code)
 
 
     def on_disconnect(self, client, userdata, disconnect_flags, reason_code, properties):
         self.is_it_connected = False
-        print("Disconnected from MQTT broker. Reason code: " + str(reason_code))
+        logger.warning("Disconnected from MQTT broker. Reason code: %s", reason_code)
         if self.on_disconnect_callback is not None:
             self.on_disconnect_callback()
 
         if str(reason_code) != "Success":
-            self.client.reconnect()
-            print("Reconnecting to MQTT broker...")
+            logger.info("Reconnecting to MQTT broker")
+            try:
+                self.client.reconnect()
+            except Exception:
+                logger.exception("MQTT reconnect failed")
 
     #def is_connected(self):
         #return self.client.is_connected()
