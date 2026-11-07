@@ -19,6 +19,7 @@ class MQTTHandler:
         on_disconnect_callback: Callable[[], None] | None = None,
     ):
         self.client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2, client_id)
+        self.client.enable_logger(logger)
         if username and password:
             self.client.username_pw_set(username, password)
         self.client.on_connect = self.on_connect
@@ -41,16 +42,17 @@ class MQTTHandler:
 
     def on_disconnect(self, client, userdata, disconnect_flags, reason_code, properties):
         self.is_it_connected = False
-        logger.warning("Disconnected from MQTT broker. Reason code: %s", reason_code)
+        logger.warning(
+            "Disconnected from MQTT broker. Reason code: %s (%r), flags: %s",
+            reason_code,
+            getattr(reason_code, "value", reason_code),
+            disconnect_flags,
+        )
         if self.on_disconnect_callback is not None:
             self.on_disconnect_callback()
 
         if str(reason_code) != "Success":
-            logger.info("Reconnecting to MQTT broker")
-            try:
-                self.client.reconnect()
-            except Exception:
-                logger.exception("MQTT reconnect failed")
+            logger.info("Paho MQTT loop will reconnect to the broker")
 
     #def is_connected(self):
         #return self.client.is_connected()
