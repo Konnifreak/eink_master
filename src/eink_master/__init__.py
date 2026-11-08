@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import datetime
 import logging
+import threading
 
 from pathlib import Path
 
@@ -16,6 +17,7 @@ logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s %(levelname)s %(name)s: %(message)s",
 )
+logger = logging.getLogger(__name__)
 
 
 def render_to_display(in_display: InkyDisplay, url: str, browser_executable: Path | None = None, timeout_seconds: int = 30) -> None:
@@ -59,22 +61,39 @@ def startup() -> tuple[dict[str, str | None], MQTTHandler, InkyDisplay]:
 
 def main() -> None:
     envs, mqtt_client, display = startup()
+    display_refresh_lock = threading.Lock()
     mqtt_client.publish_homeassistant_text_data("render_url", "eInky Frame", "eink_frame_001", "", qos=0, retain=True)
     mqtt_client.publish_homeassistant_sensor_data("status", "eInky Frame", "eink_frame_001", "Connected", qos=0, retain=True)
 
     def handle_render_url(topic: str, payload: str) -> None:
         mqtt_client.publish("homeassistant/text/render_url/state", payload, qos=0, retain=True)
-        #check if payload is a valid URL
-        if payload.startswith("http://") or payload.startswith("https://"):
-            print(f"Rendering URL: {payload}")
-            render_to_display(
-                in_display=display,
-                url=payload,
-                browser_executable=Path(envs.get("browser_executable")),
-                timeout_seconds=int(envs.get("timeout_seconds", 30)),
-            )
-        else:
-            print(f"Invalid URL: {payload}")
+        if not payload.startswith(("http://", "https://")):
+            logger.warning("Ignoring invalid URL: %s", payload)
+            return
+
+        def refresh_display() -> None:
+            if not display_refresh_lock.acquire(blocking=False):
+                logger.warning("Ignoring display refresh while another refresh is running")
+                return
+
+            try:
+                logger.info("Rendering URL: %s", payload)
+                render_to_display(
+                    in_display=display,
+                    url=payload,
+                    browser_executable=Path(envs.get("browser_executable")),
+                    timeout_seconds=int(envs.get("timeout_seconds", 30)),
+                )
+            except Exception:
+                logger.exception("Display refresh failed for URL: %s", payload)
+            finally:
+                display_refresh_lock.release()
+
+        threading.Thread(
+            target=refresh_display,
+            name="display-refresh",
+            daemon=True,
+        ).start()
 
     mqtt_client.subscribe("homeassistant/text/render_url/command", handle_render_url)
 

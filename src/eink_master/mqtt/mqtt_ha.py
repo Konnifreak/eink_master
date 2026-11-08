@@ -1,5 +1,6 @@
 import json
 import logging
+import threading
 from collections.abc import Callable
 
 import paho.mqtt.client as mqtt
@@ -49,7 +50,11 @@ class MQTTHandler:
             disconnect_flags,
         )
         if self.on_disconnect_callback is not None:
-            self.on_disconnect_callback()
+            threading.Thread(
+                target=self.on_disconnect_callback,
+                name="mqtt-disconnect-display",
+                daemon=True,
+            ).start()
 
         if str(reason_code) != "Success":
             logger.info("Paho MQTT loop will reconnect to the broker")
